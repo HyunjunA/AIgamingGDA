@@ -10,7 +10,7 @@ How to run Docker file
 Copy from Docker image to host
 0. Check Container ID
 	docker ps -a
-1. docker cp 506e411cf36a:/usr/src/app-name/test_model_AlexNet_epochs_50.h5 C:\Users\Jun\Documents\StudyingDocker\app-name7
+1. docker cp 506e411cf36a:/usr/src/app-name/test_model_AlexNet_epochs_50_batchsize_500.h5 C:\Users\Jun\Documents\StudyingDocker\AIgamingGDA
 
 How to remove container and image.
 1. docker stop $(docker ps -a -q)

@@ -8,6 +8,10 @@ import os,sys
 from CNN import cnn
 from alexnetv2 import alexnet
 from inceptionv3 import inceptionv3
+
+from sklearn.utils import class_weight
+# import sklearn.utils.class_weight 
+from sklearn.model_selection import KFold
 # 다른 모든 모델들 넣기
 # Self Driving Car algorithms
 
@@ -24,6 +28,11 @@ def main():
     batch_size = int(batch_size)
 
     data = []
+
+    # Define per-fold score containers
+    acc_per_fold = []
+    loss_per_fold = []
+    
     for root,dirs,files in os.walk(data_dir,topdown=False) :
         for file_name in files:
             full_path = os.path.join(root,file_name)
@@ -33,9 +42,32 @@ def main():
     data = np.array(data)
     images = np.array(list(data[:,0] / 255.0),dtype=np.float)
     labels = np.array(list(data[:,1]),dtype=np.int)
-    
-    
 
+
+    # class_labels = [
+    #     [1, 0, 0, 0, 0, 0, 0, 0, 0],
+    # [0, 1, 0, 0, 0, 0, 0, 0, 0],
+    # [0, 0, 1, 0, 0, 0, 0, 0, 0],
+    # [0, 0, 0, 1, 0, 0, 0, 0, 0],
+    # [0, 0, 0, 0, 1, 0, 0, 0, 0],
+    # [0, 0, 0, 0, 0, 1, 0, 0, 0],
+    # [0, 0, 0, 0, 0, 0, 1, 0, 0],
+    # [0, 0, 0, 0, 0, 0, 0, 1, 0],
+    # [0, 0, 0, 0, 0, 0, 0, 0, 1]
+    # ]
+
+    # To solve imbalanced data problem
+    # class_weights = class_weight.compute_class_weight('balanced',
+    #                                              np.unique(labels),
+    #                                              labels)
+    # class_weights = class_weight.compute_class_weight('balanced',
+    #                                              class_labels,
+    #                                              labels)
+    sample_weights = class_weight.compute_sample_weight(class_weight,labels)
+    # Define the K-fold Cross Validator 
+    kfold = KFold(n_splits=10, shuffle=True)
+
+    
     # CNN
     if modelname=="CNN":
         model=cnn()
@@ -46,12 +78,30 @@ def main():
 
     # if modelname=="Inceptionv3":
     #     model=inceptionv3()    
-    model.compile(optimizer='adam',
-                  loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-                  metrics=['accuracy'])
 
-    history = model.fit(images, labels, epochs=epochs,batch_size=batch_size,
-                        validation_data=None)
+    # K-fold Cross Validation model evaluation
+    fold_no = 1
+    for train, test in kfold.split(images, labels):
+
+        
+
+        model.compile(optimizer='adam',
+                    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                    metrics=['accuracy'])
+
+        history = model.fit(images[train], labels[train], epochs=epochs,batch_size=batch_size,
+                            validation_data=None, class_weight=class_weights)
+
+
+        # Generate generalization metrics
+        scores = model.evaluate(images[test], labels[test], verbose=0)
+        print(f'Score for fold {fold_no}: {model.metrics_names[0]} of {scores[0]}; {model.metrics_names[1]} of {scores[1]*100}%')
+        acc_per_fold.append(scores[1] * 100)
+        loss_per_fold.append(scores[0])
+
+        # Increase fold number
+        fold_no = fold_no + 1
+                            
     hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
     model.save(hfivename)
     #cv2.destroyAllWindows()

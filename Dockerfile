@@ -37,4 +37,11 @@ COPY src/data ./data
 # Running Python Application
 # CMD ["python3", "/src/main.py"]
 # CMD ["python3", "/src/binaryClassifierSVM.py"]
-CMD ["python3", "/src/check_data_various_models.py", "AlexNet", "data"]
+
+# check_data_various_models.py
+# CMD ["python3", "/src/check_data_various_models.py", "AlexNet", "data"]
+
+# check_data_various_models_v3.py
+CMD ["python3", "/src/check_data_various_models_v3.py", "AlexNet", "data", "20","500"]
+# 
+# CMD ["python3", "/src/test.py", "data"]

@@ -1,5 +1,5 @@
 import numpy as np
-import tensorflow as tf
+# import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 from constants import IMAGE_WIDTH,IMAGE_HEIGHT
     
