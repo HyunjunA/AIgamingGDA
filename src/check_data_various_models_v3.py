@@ -9,8 +9,9 @@ from CNN import cnn
 from alexnetv2 import alexnet
 from inceptionv3 import inceptionv3
 
-from sklearn.utils import class_weight
+# from sklearn.utils import class_weight
 # import sklearn.utils.class_weight 
+from sklearn.utils.class_weight import compute_class_weight
 from sklearn.model_selection import KFold
 # 다른 모든 모델들 넣기
 # Self Driving Car algorithms
@@ -19,10 +20,14 @@ from sklearn.model_selection import KFold
 
 def main():
     modelname = sys.argv[1]
+    # modelname="AlexNet"
     data_dir = sys.argv[2]
+    # data_dir="C:/Users/User/Desktop/ai-gaming/AIgamingGDA/src/data"
     
     epochs = sys.argv[3]
+    # epochs = 10
     batch_size = sys.argv[4]
+    # batch_size = 500
 
     epochs=int(epochs)
     batch_size = int(batch_size)
@@ -63,7 +68,15 @@ def main():
     # class_weights = class_weight.compute_class_weight('balanced',
     #                                              class_labels,
     #                                              labels)
-    sample_weights = class_weight.compute_sample_weight(class_weight,labels)
+    # sample_weights = class_weight.compute_sample_weight(class_weight,labels)
+
+
+    
+
+    y_integers = np.argmax(labels, axis=1)
+    class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+    d_class_weights = dict(enumerate(class_weights))
+
     # Define the K-fold Cross Validator 
     kfold = KFold(n_splits=10, shuffle=True)
 
@@ -90,7 +103,7 @@ def main():
                     metrics=['accuracy'])
 
         history = model.fit(images[train], labels[train], epochs=epochs,batch_size=batch_size,
-                            validation_data=None, class_weight=class_weights)
+                            validation_data=None, class_weight=d_class_weights)
 
 
         # Generate generalization metrics
