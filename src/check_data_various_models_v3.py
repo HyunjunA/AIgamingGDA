@@ -22,7 +22,7 @@ def main():
     modelname = sys.argv[1]
     # modelname="AlexNet"
     data_dir = sys.argv[2]
-    # data_dir="C:/Users/User/Desktop/ai-gaming/AIgamingGDA/src/data"
+    # data_dir="C:/Users/Jun/Documents/StudyingDocker/AIgamingGDA/src/data"
     
     epochs = sys.argv[3]
     # epochs = 10
@@ -73,9 +73,9 @@ def main():
 
     
 
-    y_integers = np.argmax(labels, axis=1)
-    class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
-    d_class_weights = dict(enumerate(class_weights))
+    # y_integers = np.argmax(labels, axis=1)
+    # class_weights = compute_class_weight('balanced', np.unique(y_integers), y_integers)
+    # d_class_weights = dict(enumerate(class_weights))
 
     # Define the K-fold Cross Validator 
     kfold = KFold(n_splits=10, shuffle=True)
@@ -103,7 +103,7 @@ def main():
                     metrics=['accuracy'])
 
         history = model.fit(images[train], labels[train], epochs=epochs,batch_size=batch_size,
-                            validation_data=None, class_weight=d_class_weights)
+                            validation_data=None)
 
 
         # Generate generalization metrics
