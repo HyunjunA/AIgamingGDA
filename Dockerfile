@@ -31,6 +31,7 @@ COPY src/ /src/
 RUN ls -la /src/*
 
 COPY src/data ./data
+COPY src/intersavedmodel ./intersavedmodel
 # COPY src/data/fouled_scaled ./fouled_scaled
 # COPY src/data/data1.pickle ./data1.pickle
 
@@ -43,6 +44,8 @@ COPY src/data ./data
 
 # check_data_various_models_v3.py
 # CMD ["python3", "/src/check_data_various_models_v3.py", "AlexNet", "data", "25","500"]
-CMD ["python3", "/src/check_data_various_models_v5.py", "AlexNet", "data", "15","500"]
+# Epoch, batch, k-fold crossvalidation
+CMD ["python3", "/src/check_data_various_models_v9.py", "AlexNet", "data", "5","500","5"]
+# CMD ["python3", "/src/check_data_various_models_v7.py", "AlexNet", "data", "1","100","2"]
 # 
 # CMD ["python3", "/src/test.py", "data"]

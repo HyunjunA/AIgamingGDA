@@ -1,5 +1,8 @@
 0. Set up GPU on local machine and Google Cloud Platform
 1. Imbalanced data
+1. Metrics
+	Accuracy
+	
 1. How to drive back (watch the sentex's youtube video)
 1. Upload data to memory per Epoch (Not uploading whole data once) 
 2. AlexNet hyperparameter tuning
