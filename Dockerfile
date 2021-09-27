@@ -45,7 +45,7 @@ COPY src/intersavedmodel ./intersavedmodel
 # check_data_various_models_v3.py
 # CMD ["python3", "/src/check_data_various_models_v3.py", "AlexNet", "data", "25","500"]
 # Epoch, batch, k-fold crossvalidation
-CMD ["python3", "/src/check_data_various_models_v9.py", "AlexNet", "data", "5","500","5"]
+CMD ["python3", "/src/check_data_various_models_v9.py", "AlexNet", "data", "5","500","82"]
 # CMD ["python3", "/src/check_data_various_models_v7.py", "AlexNet", "data", "1","100","2"]
 # 
 # CMD ["python3", "/src/test.py", "data"]
