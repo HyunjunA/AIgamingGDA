@@ -11,7 +11,7 @@ import os.path
 from os import path
 
 from CNN import cnn
-from alexnetv2 import alexnet
+from alexnet import alexnet
 from inceptionv3 import inceptionv3
 
 # from sklearn.utils import class_weight

@@ -1,7 +1,7 @@
 import tensorflow as tf
 from constants import IMAGE_WIDTH,IMAGE_HEIGHT
 
-def alexnetv2():
+def alexnet():
     return tf.keras.models.Sequential([
         # Here, we use a larger 11 x 11 window to capture objects. At the same
         # time, we use a stride of 4 to greatly reduce the height and width of
@@ -28,7 +28,6 @@ def alexnetv2():
         tf.keras.layers.Conv2D(filters=256, kernel_size=3, padding='same',
                                activation='relu'),
         tf.keras.layers.MaxPool2D(pool_size=3, strides=2),
-        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Flatten(),
         # Here, the number of outputs of the fully-connected layer is several
         # times larger than that in LeNet. Use the dropout layer to mitigate
@@ -37,8 +36,13 @@ def alexnetv2():
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(4096, activation='relu'),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(4096, activation='relu'),
-        tf.keras.layers.Dropout(0.5),
         # Output layer. Since we are using Fashion-MNIST, the number of
         # classes is 9, instead of 1000 as in the paper
         tf.keras.layers.Dense(9,activation='softmax')])
+
+
+
+
+
+
+# alexnet()

@@ -9,6 +9,15 @@ from getkeys import key_check
 from tensorflow import keras
 import sys
 
+W = 0
+S = 1
+A = 2
+D = 3
+WA = 4
+WD = 5
+SA = 6
+SD = 7
+NK = 8
 
 def main():
 
@@ -30,16 +39,16 @@ def main():
             # Get network prediction
             output_key = list(np.zeros((NUM_KEYS,),dtype=np.int))
             prediction = np.argmax(network.predict(input_img))
-            output_key[prediction] = 1
+            output_key = prediction
 
             # Send output
-            if output_key == W_VEC:
+            if output_key == W:
                 PressKey(W_HEX)
                 ReleaseKey(A_HEX)
                 ReleaseKey(D_HEX)
                 ReleaseKey(S_HEX)
                 print('W')
-            elif output_key == A_VEC:
+            elif output_key == A:
                 if random.randrange(0,3) == 1 :
                     PressKey(W_HEX)
                     print('WA')
@@ -51,14 +60,14 @@ def main():
                 ReleaseKey(D_HEX)
                 ReleaseKey(S_HEX)
 
-            elif output_key == S_VEC:
+            elif output_key == S:
 
                 PressKey(S_HEX)
                 ReleaseKey(A_HEX)
                 ReleaseKey(D_HEX)
                 ReleaseKey(W_HEX)
                 print('S')
-            elif output_key == D_VEC:
+            elif output_key == D:
                 if random.randrange(0,3)  == 1 :
                     PressKey(W_HEX)
                     print('WD')
@@ -69,31 +78,31 @@ def main():
                 ReleaseKey(A_HEX)
                 ReleaseKey(S_HEX)
 
-            elif output_key == WA_VEC:
+            elif output_key == WA:
                 PressKey(W_HEX)
                 PressKey(A_HEX)
                 ReleaseKey(S_HEX)
                 ReleaseKey(D_HEX)
                 print('WA')
-            elif output_key == WD_VEC:
+            elif output_key == WD:
                 PressKey(W_HEX)
                 PressKey(D_HEX)
                 ReleaseKey(S_HEX)
                 ReleaseKey(A_HEX)
                 print('WD')
-            elif output_key == SA_VEC:
+            elif output_key == SA:
                 PressKey(S_HEX)
                 PressKey(A_HEX)
                 ReleaseKey(W_HEX)
                 ReleaseKey(D_HEX)
                 print('SA')
-            elif output_key == SD_VEC:
+            elif output_key == SD:
                 PressKey(S_HEX)
                 PressKey(D_HEX)
                 ReleaseKey(W_HEX)
                 ReleaseKey(A_HEX)
                 print('SD')
-            elif output_key == NK_VEC :
+            elif output_key == NK :
                 if random.randrange(0,4) < 2:
                     PressKey(W_HEX)
                     print('W')

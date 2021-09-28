@@ -6,7 +6,7 @@ from tensorflow.python.keras.applications.inception_v3 import InceptionV3
 from constants import IMAGE_WIDTH,IMAGE_HEIGHT
 import os,sys
 from CNN import cnn
-from alexnetv2 import alexnet
+from alexnet import alexnet
 from inceptionv3 import inceptionv3
 # 다른 모든 모델들 넣기
 # Self Driving Car algorithms

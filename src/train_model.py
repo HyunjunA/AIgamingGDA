@@ -4,14 +4,15 @@ import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 from tensorflow.python.keras.applications.inception_v3 import InceptionV3
 from keras.models import load_model
-
+from keras import backend as K
 from constants import IMAGE_WIDTH,IMAGE_HEIGHT
 import os,sys
 import os.path
 from os import path
 
 from CNN import cnn
-from alexnetv2 import alexnet
+from alexnet import alexnet
+from alexnetv2 import alexnetv2
 from inceptionv3 import inceptionv3
 
 # from sklearn.utils import class_weight
@@ -20,80 +21,90 @@ from sklearn.utils.class_weight import compute_class_weight
 from sklearn.model_selection import KFold
 from time import time
 import random
+physical_devices = tf.config.list_physical_devices('GPU')
+try:
+    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+except:
+    # Invalid device or cannot modify virtual devices once initialized.
+    pass
 # 다른 모든 모델들 넣기
 # Self Driving Car algorithms
 
+class LRSchedule(tf.keras.optimizers.schedules.LearningRateSchedule):
+
+    def __init__(self, initial_learning_rate):
+        self.initial_learning_rate = initial_learning_rate
+
+    def __call__(self,step):
+        return
 def preprocess_data(data):
 
     data = np.array(data)
     images = np.array(list(data[:,0] / 255.0),dtype=np.float)
     labels = np.array(list(data[:,1]),dtype=np.int)
-    labels = np.argmax(labels, axis=1)
+    #labels = np.argmax(labels, axis=1)
     return images,labels
 
 def main():
+
+    # Set up parameters
     modelname = sys.argv[1]
     # modelname="AlexNet"
     data_dir = sys.argv[2]
     # data_dir="C:/Users/User/Desktop/ai-gaming/AIgamingGDA/src/data"
-    
     epochs = int(sys.argv[3])
     # epochs = 1
     batch_size = int(sys.argv[4])
     # batch_size = 3
     num_files = int(sys.argv[5])
-
     class_weight = {0 : 0.32,
                      1 : 3.63,
                      2 : 1.56,
                      3: 1.78,
                      4: 5.16,
                      5: 3.836,
-                     6: 8.0,
-                     7: 6.0,
+                     6: 1.0,
+                     7: 1.0,
                      8: 0.26
                      }
-
-
-    # Define per-fold score containers
-    acc_per_fold = []
-    loss_per_fold = []
 
 
     # CNN
     if modelname=="CNN":
         model=cnn()
-    
     # AlexNet
     if modelname=="AlexNet":
         model=alexnet()
+    if modelname=="AlexNetV2":
+        model = alexnetv2()
+    # if modelname=="Inceptionv3":
+    #     model=inceptionv3()
         
 
-
-    pathdockersavedmodelinlocal="C:/Users/Jun/Documents/StudyingDocker/AIgamingGDA/"
+    # Load saved model if it exists
+    pathdockersavedmodelinlocal="C:/Users/ravee/Documents/Fall2021/ML For Games/AIgamingGDA/src/intersavedmodel"
     # pathdockersavedmodelindocker="/usr/src/app-name/intersavedmodel/"
     pathdockersavedmodelindocker="./intersavedmodel/"
 
     savedmodelfile="test_model_"+modelname+"_epochs"+"_"+str(epochs)+"_batchsize_"+str(batch_size)+".h5"
-    savedmodelfile="test_model_AlexNet_epochs_10_batchsize_500_45data.h5"
+    #savedmodelfile="test_model_AlexNet_epochs_10_batchsize_500_45data.h5"
 
     savedmodelpathindocker=pathdockersavedmodelindocker+savedmodelfile
     savedmodelpathinlocal=pathdockersavedmodelinlocal+savedmodelfile
     
     # in docker
-    anspath=path.exists(savedmodelpathindocker)
+    anspath=path.exists(savedmodelpathinlocal)
     if anspath==True:
         print("Load saved model file before training")
-        model=load_model(savedmodelpathindocker)
+        model=load_model(savedmodelpathinlocal)
     if anspath==False:
         print("Cannot load saved model file before training")
     
-
-    # if modelname=="Inceptionv3":
-    #     model=inceptionv3()    
-
-    model.compile(optimizer='adam',
-                    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=False),
+    learning_rate = 0.0001
+    decay_rate = learning_rate / epochs
+    #sgd = tf.keras.optimizers.SGD(learning_rate=learning_rate)
+    model.compile(optimizer='sgd',
+                    loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
                     metrics=['accuracy'])
     
 
@@ -107,22 +118,32 @@ def main():
 
     # Load saved model if it exists
     # model=load_model("/usr/src/app-name/test_model_AlexNet_epochs_50_batchsize_500.h5")
-    pathdockersavedmodelinlocal="C:/Users/Jun/Documents/StudyingDocker/AIgamingGDA/"
+    """pathdockersavedmodelinlocal="C:/Users/ravee/Documents/Fall2021/ML For Games/AIgamingGDA/src/intersavedmodel"
     pathdockersavedmodelindocker="/usr/src/app-name/"
     savedmodelfile="test_model_"+modelname+"_epochs"+"_"+str(epochs)+"_batchsize_"+str(batch_size)+".h5"
     savedmodelpathindocker=pathdockersavedmodelindocker+savedmodelfile
     savedmodelpathinlocal=pathdockersavedmodelinlocal+savedmodelfile
 
     # in docker
-    anspath=path.exists(savedmodelpathindocker)
+    anspath=path.exists(savedmodelpathinlocal)
     if anspath==True:
         print("Found saved model file!")
-        model=load_model(savedmodelpathindocker)
+        model=load_model(savedmodelpathinlocal)
     if anspath==False:
-        print("There is not the saved model file!")
+        print("There is not the saved model file!")"""
+
+    tensorboard = tf.keras.callbacks.TensorBoard(
+        log_dir='./tb_logs',
+        histogram_freq=0,
+        batch_size=batch_size,
+        write_graph=True,
+        write_grads=True
+    )
+    tensorboard.set_model(model)
 
     #Main Training Loop
     print('Starting training')
+    train_start = time()
     for e in range(epochs):
         print(f'Epoch {e}:')
         print('---------------------------------------------------------------------------------------------------------')
@@ -130,12 +151,14 @@ def main():
         file_nums = list(range(1,num_files+1))
         random.shuffle(file_nums)
         i = 0
+        #if e < 3  :
+            #K.set_value(model.optimizer.learning_rate,learning_rate/5)
+            #learning_rate /= 5
         #iterate through all data
         while i < len(file_nums):
             data = []
 
             # Load 5 files
-            print(f'Training on files {file_nums[i:i+5]}')
             for file_num in file_nums[i:i+5]:
                 if file_num==7:
                     continue
@@ -204,13 +227,13 @@ def main():
             batch_no = 1
             #Generate batches from train dataset
             while batch_start < len(train):
-                print(f"Batch {batch_no}")
                 batch_data = train[batch_start:batch_start+batch_size]
                 batch_start += batch_size
                 X_train,y_train = preprocess_data(batch_data)
-                train_metrics = model.train_on_batch(X_train, y_train,class_weight=class_weight,
-                                                    reset_metrics=False,return_dict=True)
-                print(train_metrics)
+                #train_metrics = model.train_on_batch(X_train, y_train,class_weight=class_weight,
+                                                    #reset_metrics=False,return_dict=True)
+                train_metrics = model.train_on_batch(X_train, y_train,
+                                                     reset_metrics=False,return_dict=True)
                 batch_no += 1
 
 
@@ -227,24 +250,23 @@ def main():
             batch_data = []
             X_test,y_test = preprocess_data(test)
             test_metrics = model.test_on_batch(X_test,y_test,reset_metrics=False,return_dict=True)
-            print('Training metrics after 5 files:')
-            print(train_metrics)
-            print('Test metrics after 5 files:')
-            print(test_metrics)
-            print('')
-            print("Time per five npy files /n")
+            print(f'Train metrics after 5 files: {train_metrics}')
+            print(f'Test metrics after 5 files: {test_metrics}')
+            print("Time per five npy files")
             print(time() - start)
 
-            # Save model every 20 files
-            if i % 20 == 0:
+            # Save model every 40 files
+            if i % 40 == 0:
                 print('Saving Model')
-                hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
-                model.save(hfivename)
+                hfivename='./intersavedmodel/test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
+                #model.save(hfivename)
 
         # Save model at the end of each epoch
         print('Saving Model End Epoch')
-        hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
+        hfivename='./intersavedmodel/test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
         model.save(hfivename)
+
+        tensorboard.on_epoch_end(e, train_metrics)
 
     #print final metrics
     print('Training finished!')
@@ -252,11 +274,15 @@ def main():
     print(train_metrics)
     print('Final test metrics:')
     print(test_metrics)
+    train_end = time()
 
     #Final save model
-    hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
+    hfivename='./intersavedmodel/test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
     model.save(hfivename)
     print('Model Saved')
+
+    print(f'Total Training Time for {epochs} epochs, {num_files} files, and batch size {batch_size}: {train_end-train_start}')
+
 
 if __name__=='__main__':
     main()
