@@ -45,7 +45,21 @@ COPY src/intersavedmodel ./intersavedmodel
 # check_data_various_models_v3.py
 # CMD ["python3", "/src/check_data_various_models_v3.py", "AlexNet", "data", "25","500"]
 # Epoch, batch, k-fold crossvalidation
-CMD ["python3", "/src/check_data_various_models_v9.py", "AlexNet", "data", "5","500","5"]
+# CMD ["python3", "/src/check_data_various_models_v9.py", "AlexNet", "data", "5","500","5"]
 # CMD ["python3", "/src/check_data_various_models_v7.py", "AlexNet", "data", "1","100","2"]
-# 
+# Epoch, batch, total number of training files
+# CMD ["python3", "/src/check_data_various_models_v11.py", "AlexNet", "data", "5","500","81"]
+# CMD ["python3", "/src/check_data_various_models_v11.py", "AlexNet", "data", "10","500","81"]
+# CMD ["python3", "/src/check_data_various_models_v11.py", "AlexNet", "data", "25","256","81"]
+# CMD ["python3", "/src/check_data_various_models_v11.py", "AlexNet", "data", "20","32","81"]
+# CMD ["python3", "/src/check_data_various_models_v11.py", "AlexNet", "data", "20","16","81"]
+# CMD ["python3", "/src/check_data_various_models_v11.py", "AlexNet", "data", "200","16","81"]
+# CMD ["python3", "/src/check_data_various_models_v11.py", "CNN", "data", "5","256","81"]
+
+
+# python train_model.py -d <data dir> -n <num files of data> [-m] <model name> [-e] <num epochs> [-b] <batch size> [-lr] <learning_rate>
+# CNN, AlexNet, AlexNetV2, or InceptionV3
+CMD ["python3", "/src/train_model.py", "-d", "data", "-n","1","-m","InceptionV3","-e","3","-b","32","-lr","0.0001"]
+# python train_model.py -d <data dir> -n <num files of data> [-m] <model name> [-e] <num epochs> [-b] <batch size> [-lr] <learning_rate>
+
 # CMD ["python3", "/src/test.py", "data"]

@@ -1,3 +1,4 @@
 tensorflow
+tflearn
 opencv-python
 sklearn

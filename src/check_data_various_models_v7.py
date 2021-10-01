@@ -18,6 +18,7 @@ from inceptionv3 import inceptionv3
 # import sklearn.utils.class_weight 
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.model_selection import KFold
+from time import time
 # 다른 모든 모델들 넣기
 # Self Driving Car algorithms
 
@@ -27,12 +28,12 @@ def main():
     modelname = sys.argv[1]
     # modelname="AlexNet"
     data_dir = sys.argv[2]
-    # data_dir="C:/Users/Jun/Documents/StudyingDocker/AIgamingGDA/src/data"
+    # data_dir="C:/Users/User/Desktop/ai-gaming/AIgamingGDA/src/data"
     
     epochs = sys.argv[3]
-    # epochs = 10
+    # epochs = 1
     batch_size = sys.argv[4]
-    # batch_size = 500
+    # batch_size = 3
 
     epochs=int(epochs)
     batch_size = int(batch_size)
@@ -51,24 +52,47 @@ def main():
     # AlexNet
     if modelname=="AlexNet":
         model=alexnet()
+        
 
+
+    model.compile(optimizer='adam',
+                        loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                        metrics=['accuracy'])
+
+    
     # if modelname=="Inceptionv3":
     #     model=inceptionv3()    
 
 
     
     checked_file_name_list=[]
-    for root,dirs,files in os.walk(data_dir,topdown=False) :
+   
+    filescountunit=2
+    checked_file_name_list_total=0
+    # files = os.listdir(data_dir)
+
+
+    for root_A,dirs_A,files_A in os.walk(data_dir,topdown=False) :
+        root=root_A
+        dirs=dirs_A
+        files=files_A
+
+    while len(files)!=0:
         for file_name in files:
             full_path = os.path.join(root,file_name)
             data.extend(np.load(full_path,allow_pickle=True))
             checked_file_name_list.append(file_name)
             
-            if len(checked_file_name_list)==5:
+            if (len(checked_file_name_list)%filescountunit==0) or (len(files)<5 and len(files)==len(checked_file_name_list)):
                 new_files=set(files).difference(set(checked_file_name_list))
                 files=list(new_files)
+                print("checked_file_name_list_len_total /n")
+                checked_file_name_list_total+=len(checked_file_name_list)
+
+                print(checked_file_name_list_total)
+                checked_file_name_list=[]
                 break
-            
+        
         # print("Here")
 
         data = np.array(data)
@@ -132,7 +156,9 @@ def main():
         # d_class_weights = dict(enumerate(class_weights))
 
         # Define the K-fold Cross Validator 
-        kfold = KFold(n_splits=10, shuffle=True)
+        kfoldnum=sys.argv[5]
+        kfoldnum=int(kfoldnum)
+        kfold = KFold(n_splits=kfoldnum, shuffle=True)
 
         
         
@@ -140,20 +166,17 @@ def main():
         # K-fold Cross Validation model evaluation
         fold_no = 1
 
-        
+        start = time()
+
         for train, test in kfold.split(images, labels):
 
             
 
-            model.compile(optimizer='adam',
-                        loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-                        metrics=['accuracy'])
 
             history = model.fit(images[train], labels[train], epochs=epochs,batch_size=batch_size,
                                 validation_data=None)
 
-            # history = model.fit_generator(images[train], labels[train], epochs=epochs, 
-            #                     validation_data=None)
+
 
 
             # Generate generalization metrics
@@ -164,9 +187,18 @@ def main():
 
             # Increase fold number
             fold_no = fold_no + 1
-                                
+        
+        print("Time per five npy files /n")
+        print(time() - start)
+
+        data=[]
         hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
         model.save(hfivename)
-        #cv2.destroyAllWindows()
+                            
+    hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
+    model.save(hfivename)
+    print("Model Trained with entire files!")
+    # data=[]
+    #cv2.destroyAllWindows()
 if __name__=='__main__':
     main()

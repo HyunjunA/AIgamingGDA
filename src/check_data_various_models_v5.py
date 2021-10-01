@@ -18,6 +18,7 @@ from inceptionv3 import inceptionv3
 # import sklearn.utils.class_weight 
 from sklearn.utils.class_weight import compute_class_weight
 from sklearn.model_selection import KFold
+from time import time
 # 다른 모든 모델들 넣기
 # Self Driving Car algorithms
 
@@ -52,6 +53,12 @@ def main():
     if modelname=="AlexNet":
         model=alexnet()
 
+
+    model.compile(optimizer='adam',
+                        loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+                        metrics=['accuracy'])
+
+    
     # if modelname=="Inceptionv3":
     #     model=inceptionv3()    
 
@@ -67,6 +74,8 @@ def main():
             if len(checked_file_name_list)==5:
                 new_files=set(files).difference(set(checked_file_name_list))
                 files=list(new_files)
+                print("checked_file_name_list_len \n")
+                print(len(checked_file_name_list))
                 break
             
         # print("Here")
@@ -132,20 +141,24 @@ def main():
         # d_class_weights = dict(enumerate(class_weights))
 
         # Define the K-fold Cross Validator 
-        kfold = KFold(n_splits=10, shuffle=True)
+        kfoldnum=5
+        kfold = KFold(n_splits=kfoldnum, shuffle=True)
 
         
         
 
         # K-fold Cross Validation model evaluation
         fold_no = 1
+
+        start = time()
+
         for train, test in kfold.split(images, labels):
 
             
 
-            model.compile(optimizer='adam',
-                        loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
-                        metrics=['accuracy'])
+            # model.compile(optimizer='adam',
+            #             loss=tf.keras.losses.CategoricalCrossentropy(from_logits=False),
+            #             metrics=['accuracy'])
 
             history = model.fit(images[train], labels[train], epochs=epochs,batch_size=batch_size,
                                 validation_data=None)
@@ -162,9 +175,13 @@ def main():
 
             # Increase fold number
             fold_no = fold_no + 1
+        
+        print("Time per five npy files \n")
+        print(time() - start)
                                 
         hfivename='./test_model_'+modelname+'_epochs_'+str(epochs)+'_batchsize_'+str(batch_size)+'.h5'
         model.save(hfivename)
+        data=[]
         #cv2.destroyAllWindows()
 if __name__=='__main__':
     main()
